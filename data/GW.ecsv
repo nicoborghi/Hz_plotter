@@ -1,0 +1,15 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: z, datatype: float64}
+# - {name: Hz, datatype: float64}
+# - {name: errHz_up, datatype: float64}
+# - {name: errHz_down, datatype: float64}
+# - {name: reference, datatype: string}
+# meta: !!omap
+# - description: H(0) measurements from gravitational waves as standard sirens
+# - name: Stangard Sirens
+# - name_short: GW
+# schema: astropy-2.0
+z Hz errHz_up errHz_down reference
+0 68 12 8 "LVK GWTC-3"

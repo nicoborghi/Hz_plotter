@@ -1,0 +1,14 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: z, datatype: float64}
+# - {name: Hz, datatype: float64}
+# - {name: errHz, datatype: float64}
+# - {name: reference, datatype: string}
+# meta: !!omap
+# - description: H(0) measurements from type Ia supernovae
+# - name: Type Ia supernovae
+# - name_short: SNIa
+# schema: astropy-2.0
+z Hz errHz reference
+0 73.04 1.04 "Riess et al. (2022)"

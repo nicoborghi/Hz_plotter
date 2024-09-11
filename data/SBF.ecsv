@@ -1,0 +1,14 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: z, datatype: float64}
+# - {name: Hz, datatype: float64}
+# - {name: errHz, datatype: float64}
+# - {name: reference, datatype: string}
+# meta: !!omap
+# - description: H(0) measurements from surface brightness fluctuations
+# - name: Surface Brightness Fluctuations
+# - name_short: SBF
+# schema: astropy-2.0
+z Hz errHz reference
+0 73.3 2.5 "Blakeslee et al. (2021)"

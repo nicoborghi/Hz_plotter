@@ -1,0 +1,15 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: z, datatype: float64}
+# - {name: Hz, datatype: float64}
+# - {name: errHz, datatype: float64}
+# - {name: setup, datatype: string}
+# - {name: reference, datatype: string}
+# meta: !!omap
+# - description: H(0) measurements from cosmic microwave background in LCDM cosmology
+# - name: Cosmic Microwave Background
+# - name_short: CMB
+# schema: astropy-2.0
+z Hz errHz setup reference
+0 67.27 0.60 baseline "Planck 2018"
