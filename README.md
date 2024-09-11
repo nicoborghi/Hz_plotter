@@ -1,5 +1,5 @@
 # H(z) plotter
-Plots current and future constraints to the expansion history of the Universe. Hosted on Streamlit.
+Plots constraints to the expansion history of the Universe. Hosted on Streamlit.
 
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://hzplotter.streamlit.app/)
