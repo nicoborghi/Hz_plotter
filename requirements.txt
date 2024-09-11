@@ -3,3 +3,4 @@ numpy
 matplotlib
 astropy
 mpl_fontkit
+scipy
