@@ -178,10 +178,8 @@ with st.sidebar.container(height=320):
 #################### Figure
 ####################
 
-print(bool(latex))
 plt.rc('text', usetex=latex)
 plt.rc('font', family=font)
-print(plt.rcParams)
 
 plt.rcParams["mathtext.fontset"] = "custom"
 plt.rcParams["mathtext.rm"] = font
@@ -238,7 +236,7 @@ ax.set_ylabel(r'$H(z)$  [km s$^{-1}$ Mpc$^{-1}$]', fontsize=12)
 ax.legend(h,l,loc='center left', bbox_to_anchor=(1, 0.5))
 
 
-plt.tight_layout()
+fig.tight_layout()
 svg_write(fig, center = False)
 
 
