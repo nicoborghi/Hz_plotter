@@ -8,6 +8,8 @@ from io import StringIO
 from astropy.table import Table
 import mpl_fontkit as fk
 
+fk.install("Lato")
+
 lambda_cosmo = {"H0": 67.27, "Om0": 0.3}
 
 all_probes =  ["SNIa", "CMB", "SBF", "GW", "BAO", "CC"]
@@ -146,9 +148,9 @@ with st.sidebar.container(height=320):
 # 
     cc4_1, cc_4_2, cc_4_3, cc_4_4 = st.columns([1,1,1.3,0.7])
     with cc4_1:
-        width = st.number_input("Width", 10) #, min_value=1, max_value=20)
+        width = st.number_input("Width", value=10)
     with cc_4_2:
-        height = st.number_input("Height", 5)
+        height = st.number_input("Height", value=5)
     with cc_4_3:
         font = st.selectbox("Font", fk.list_fonts())
     with cc_4_4:
