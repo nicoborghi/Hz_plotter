@@ -8,8 +8,8 @@
 # - {name: reference, datatype: string}
 # meta: !!omap
 # - description: H(0) measurements from gravitational waves as standard sirens
-# - name: Stangard Sirens
+# - name: Standard Sirens
 # - name_short: GW
 # schema: astropy-2.0
 z Hz errHz_up errHz_down reference
-0 68 12 8 "LVK GWTC-3"
+0 71.0 9.0 7.1 "LVK GWTC-5.0"

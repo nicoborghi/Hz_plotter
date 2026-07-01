@@ -7,14 +7,15 @@
 # - {name: sample, datatype: string}
 # - {name: reference, datatype: string}
 # meta: !!omap
-# - description: H(0) measurements from baryionic acoustic oscillations
+# - description: H(z) measurements from baryionic acoustic oscillations
 # - note: DH/rd measurements
 # - name: Baryonic Acoustic Oscillations
 # - name_short: BAO
 # schema: astropy-2.0
 z dHrD errdHrD sample reference
-0.510 20.98 0.61 LRG1 "DESI 2024"
-0.706 20.08 0.60 LRG2 "DESI 2024"
-0.930 17.88 0.35 LRG3+ELG1 "DESI 2024"
-1.317 13.82 0.42 ELG2 "DESI 2024"
-2.330 8.52 0.17 LyaQSO "DESI 2024"
+0.510 21.863 0.425 LRG1 "DESI DR2 2025"
+0.706 19.455 0.330 LRG2 "DESI DR2 2025"
+0.934 17.641 0.193 LRG3+ELG1 "DESI DR2 2025"
+1.321 14.176 0.221 ELG2 "DESI DR2 2025"
+1.484 12.817 0.516 QSO "DESI DR2 2025"
+2.330 8.632 0.101 Lya "DESI DR2 2025"
