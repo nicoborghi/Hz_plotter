@@ -5,15 +5,85 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import base64
 from io import StringIO
+from pathlib import Path
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 from astropy.table import Table
-import mpl_fontkit as fk
+from matplotlib import font_manager
 
-fk.install("Lato")
+GOOGLE_FONTS = [
+    "Default",
+    "Inter",
+    "Roboto",
+    "Lato",
+    "Source Sans 3",
+    "Merriweather",
+    "Playfair Display",
+    "Space Grotesk",
+]
+FONT_CACHE_DIR = Path("/tmp/hz-plotter-google-fonts")
+GOOGLE_FONT_TTF_URLS = {
+    "Inter": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz,wght%5D.ttf",
+    ],
+    "Roboto": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/Roboto%5Bwdth,wght%5D.ttf",
+    ],
+    "Lato": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/lato/Lato-Regular.ttf",
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/lato/Lato-Bold.ttf",
+    ],
+    "Source Sans 3": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/sourcesans3/SourceSans3%5Bwght%5D.ttf",
+    ],
+    "Merriweather": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/merriweather/Merriweather%5Bopsz,wdth,wght%5D.ttf",
+    ],
+    "Playfair Display": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf",
+    ],
+    "Space Grotesk": [
+        "https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf",
+    ],
+}
+
+
+@st.cache_resource(show_spinner=False)
+def load_google_font(font_family):
+    """Download and register a Google Font for Matplotlib rendering."""
+
+    if font_family == "Default":
+        return None
+
+    FONT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    loaded = False
+    for index, font_url in enumerate(GOOGLE_FONT_TTF_URLS[font_family]):
+        suffix = Path(font_url).suffix or ".ttf"
+        font_path = FONT_CACHE_DIR / f"{font_family.replace(' ', '_')}_{index}{suffix}"
+        if not font_path.exists():
+            font_path.write_bytes(urlopen(Request(font_url, headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read())
+        try:
+            font_manager.fontManager.addfont(str(font_path))
+            loaded = True
+        except RuntimeError:
+            continue
+    return font_family if loaded else None
+
 
 lambda_cosmo = {"H0": 67.27, "Om0": 0.3}
 
+theme = st.session_state.get("theme", "Light")
+dark = theme == "Dark"
+fig_bg = "#0e1117" if dark else "white"
+
+if st.session_state.get("last_theme") != theme:
+    for k in [k for k in st.session_state if str(k).startswith("color_")]:
+        del st.session_state[k]
+    st.session_state["last_theme"] = theme
+
 all_probes =  ["SNIa", "CMB", "SBF", "GW", "BAO", "CC"]
-all_colors =  ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE', '#000000']
+all_colors =  ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE',
+               '#FFFFFF' if dark else '#000000']
 all_markers = ["^", ".", "D", "X", "p", "v"]
 
 def_size = 4
@@ -143,58 +213,76 @@ with st.sidebar.container(height=350):
 
 
 st.sidebar.markdown(f"#### Plot settings")
-with st.sidebar.container(height=320):
-# 
-# 
-    cc4_1, cc_4_2, cc_4_3, cc_4_4 = st.columns([1,1,1.3,0.7])
-    with cc4_1:
-        width = st.number_input("Width", value=10)
-    with cc_4_2:
-        height = st.number_input("Height", value=5)
-    with cc_4_3:
-        font = st.selectbox("Font", fk.list_fonts())
-    with cc_4_4:
-        latex = bool(st.selectbox("Latex", [0, 1], index=0))
+with st.sidebar.container():
 
-    cc4_1, cc_4_2, cc_4_3, cc_4_4 = st.columns([1,1,1,1])
-    with cc4_1:
-        xlim_min = st.number_input("min(x)", value=-0.1)
-        xxlim_min = st.number_input("axins min(x)", value=-0.02)
-        ixlim_min = st.number_input("axins %min(x)", value=0.08)
-    with cc_4_2:
-        xlim_max = st.number_input("max(x)", value=2.6)
-        xxlim_max = st.number_input("axins max(x)", value=0.04)
-        ixlim_max = st.number_input("axins %width(x)", value=0.5)
-    with cc_4_3:
-        ylim_min = st.number_input("min(y)", value=0)
-        yylim_min = st.number_input("axins min(y)", value=57)
-        iylim_min = st.number_input("axins %min(y)", value=0.15)
+    c1, c2, c3 = st.columns(3)
+    width = c1.number_input("Width", value=10)
+    height = c2.number_input("Height", value=5)
+    dpi = c3.number_input("DPI", value=300, min_value=50, max_value=600, step=50)
 
-    with cc_4_4:
-        ylim_max = st.number_input("max(y)", value=341)
-        yylim_max = st.number_input("axins max(y)", value=83)
-        iylim_max = st.number_input("axins %width(y)", value=0.45)
+    c1, c2 = st.columns([1.5, 1])
+    font = c1.selectbox("Font", GOOGLE_FONTS, help="Downloads the selected Google Font for plot labels")
+    c2.selectbox("Theme", ["Light", "Dark"], key="theme")
+
+    c1, c2, c3, c4 = st.columns(4)
+    latex = c1.checkbox("LaTeX", value=False)
+    legend = c2.checkbox("Legend", value=True)
+    legend_size = c3.number_input("Legend size", value=10, min_value=1)
+    tick_size = c4.number_input("Ticks size", value=10, min_value=1)
+
+    with st.expander("Axis limits & inset"):
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            xlim_min = st.number_input("min(x)", value=-0.1)
+            xxlim_min = st.number_input("axins min(x)", value=-0.02)
+            ixlim_min = st.number_input("axins %min(x)", value=0.08)
+        with c2:
+            xlim_max = st.number_input("max(x)", value=2.6)
+            xxlim_max = st.number_input("axins max(x)", value=0.04)
+            ixlim_max = st.number_input("axins %width(x)", value=0.5)
+        with c3:
+            ylim_min = st.number_input("min(y)", value=0)
+            yylim_min = st.number_input("axins min(y)", value=57)
+            iylim_min = st.number_input("axins %min(y)", value=0.15)
+        with c4:
+            ylim_max = st.number_input("max(y)", value=341)
+            yylim_max = st.number_input("axins max(y)", value=83)
+            iylim_max = st.number_input("axins %width(y)", value=0.45)
 
 
 ####################
 #################### Figure
 ####################
 
+try:
+    font_family = load_google_font(font)
+except (URLError, TimeoutError, OSError, RuntimeError) as exc:
+    font_family = None
+    st.sidebar.warning(f"Could not load {font}: {exc}")
+
+plt.style.use(["default", "dark_background"] if dark else "default")
+
 plt.rc('text', usetex=latex)
-plt.rc('font', family=font)
+if latex:
+    plt.rcParams["text.latex.preamble"] = r"\boldmath"
+    plt.rcParams["font.weight"] = "bold"
+    plt.rcParams["axes.labelweight"] = "bold"
+if font_family is not None:
+    plt.rc('font', family=font_family)
+    plt.rcParams["mathtext.fontset"] = "custom"
+    plt.rcParams["mathtext.rm"] = font_family
+    plt.rcParams["mathtext.it"] = font_family
 
-plt.rcParams["mathtext.fontset"] = "custom"
-plt.rcParams["mathtext.rm"] = font
-plt.rcParams["mathtext.it"] = font
-
-fig, ax = plt.subplots(figsize=(width, height), dpi=300)
+fig, ax = plt.subplots(figsize=(width, height), dpi=dpi, facecolor=fig_bg)
+ax.set_facecolor(fig_bg)
 ax.set_xlim(xlim_min,xlim_max)
 ax.set_ylim(ylim_min,ylim_max)
 axins = ax.inset_axes([ixlim_min, ixlim_max, iylim_min, iylim_max])
+axins.set_facecolor(fig_bg)
 axins.xaxis.set_visible(False)
 axins.set_xlim(xxlim_min, xxlim_max)
 axins.set_ylim(yylim_min, yylim_max)
-ax.indicate_inset_zoom(axins, edgecolor="dimgrey")
+ax.indicate_inset_zoom(axins, edgecolor="grey" if dark else "dimgrey")
 
 zz = np.linspace(0, 2.5, 1000)
 ax.plot(zz, cosmo.H(zz, lambda_cosmo), ls="--", color='silver', zorder=0)
@@ -235,7 +323,10 @@ h+=ax.get_legend_handles_labels()[0]
 l+=ax.get_legend_handles_labels()[1] 
 ax.set_xlabel(r'$z$')
 ax.set_ylabel(r'$H(z)$  [km s$^{-1}$ Mpc$^{-1}$]', fontsize=12)
-ax.legend(h,l,loc='center left', bbox_to_anchor=(1, 0.5))
+ax.tick_params(labelsize=tick_size)
+axins.tick_params(labelsize=tick_size)
+if legend:
+    ax.legend(h,l,loc='center left', bbox_to_anchor=(1, 0.5), fontsize=legend_size)
 
 
 fig.tight_layout()
@@ -248,7 +339,7 @@ cD1, cD2 = st.columns([.2,1])
 with cD1:
     fmt = st.selectbox("Select format", ["jpg", "png", "pdf", "svg", "eps"], index=0, label_visibility="hidden")
     fname = f"Hz_plotter.{fmt}"
-    plt.savefig(fname, transparent=True)
+    plt.savefig(fname, transparent=not dark, facecolor=fig_bg)
 
 with cD1:
     with open(fname, "rb") as img:
